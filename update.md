@@ -1,3 +1,3 @@
 # Latest Updates
 Updated these terms:
-1. Fix a problem that causes package name conflict.
+1. Fix the 'No such file or directory' error.
