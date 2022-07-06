@@ -51,6 +51,8 @@ jobs:
         cd ..
     - name: Zip files
       run: |
+        pwd
+        ls
         zip -r -y ./hello_world_linux.zip ./hello_world_linux
         cd ..
     - name: Upload release assets
@@ -91,6 +93,8 @@ jobs:
         cd ..
     - name: Zip files
       run: |
+        pwd
+        ls
         zip -r -y ./hello_world_windows.zip ./hello_world_windows
         cd ..
     - name: Upload release assets
