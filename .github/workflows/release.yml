@@ -10,7 +10,7 @@ jobs:
   publish_release:
     runs-on: ubuntu-latest
     outputs:
-      upload_url: steps.create_release.outputs.upload_url
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
       - name: Checkout source
         uses: actions/checkout@v2
@@ -89,7 +89,7 @@ jobs:
     - name: Pack the files
       run: |
         mkdir ./release
-        cp ./dist/hello_world ./release/
+        cp ./dist/hello_world.exe ./release/
         cp README.md ./release
     - name: Zip the Build
       run: zip -r hello_world.zip ./release/*
