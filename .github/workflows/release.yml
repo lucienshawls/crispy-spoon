@@ -12,6 +12,9 @@ jobs:
     steps:
       - name: Checkout source
         uses: actions/checkout@v2
+      - name: File placement preparation
+        run: |
+          mkdir ./release
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -43,19 +46,23 @@ jobs:
         pyinstaller -F -n hello_world hello_world.py
     - name: Arrange files
       run: |
-        mkdir ./release
-        cp ./dist/hello_world ./release/
-        cp README.md ./release
+        mkdir ./release/hello_world_linux
+        cd ./release/hello_world_linux/
+        cp ../../dist/hello_world .
+        cp ../../README.md .
+        cd ..
     - name: Zip files
-      run: zip -r hello_world.zip ./release/*
+      run: |
+        zip -r ./hello_world_linux.zip ./hello_world_linux
+        cd ..
     - name: Upload release assets
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ needs.publish_release.outputs.upload_url }}
-        asset_path: ./hello_world.zip
-        asset_name: hello_world.zip
+        asset_path: ./release/hello_world_linux.zip
+        asset_name: hello_world_liunx.zip
         asset_content_type: application/zip
   windows_release:
     runs-on: windows-latest
@@ -78,17 +85,21 @@ jobs:
         pyinstaller -F -n hello_world.exe hello_world.py
     - name: Arrange files
       run: |
-        mkdir ./release
-        cp ./dist/hello_world.exe ./release/
-        cp README.md ./release
+        mkdir ./release/hello_world_windows
+        cd ./release/hello_world_windows/
+        cp ../../dist/hello_world.exe .
+        cp ../../README.md .
+        cd ..
     - name: Zip files
-      run: zip -r hello_world.zip ./release/*
+      run: |
+        zip -r ./hello_world_windows.zip ./hello_world_windows
+        cd ..
     - name: Upload release assets
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ needs.publish_release.outputs.upload_url }}
-        asset_path: ./hello_world.zip
-        asset_name: hello_world.zip
+        asset_path: ./release/hello_world_windows.zip
+        asset_name: hello_world_windows.zip
         asset_content_type: application/zip
