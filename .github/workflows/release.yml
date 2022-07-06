@@ -12,9 +12,6 @@ jobs:
     steps:
       - name: Checkout source
         uses: actions/checkout@v2
-      - name: File placement preparation
-        run: |
-          mkdir ./release
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -46,7 +43,8 @@ jobs:
         pyinstaller -F -n hello_world hello_world.py
     - name: Arrange files
       run: |
-        mkdir ./release/hello_world_linux
+        mkdir ./release/
+        mkdir ./release/hello_world_linux/
         cd ./release/hello_world_linux/
         cp ../../dist/hello_world .
         cp ../../README.md .
@@ -85,7 +83,8 @@ jobs:
         pyinstaller -F -n hello_world.exe hello_world.py
     - name: Arrange files
       run: |
-        mkdir ./release/hello_world_windows
+        mkdir ./release/
+        mkdir ./release/hello_world_windows/
         cd ./release/hello_world_windows/
         cp ../../dist/hello_world.exe .
         cp ../../README.md .
