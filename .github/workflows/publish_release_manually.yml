@@ -1,9 +1,10 @@
-name: Pyinstaller Release
+name: Publish Release Manually
 on:
-  push:
-    # Sequence of patterns matched against refs/tags
-    tags:
-      - "v*" # Push events to matching v*, i.e. v1.0, v20.15.10
+  workflow_dispatch:
+    inputs:
+      tags:
+        required: True
+        description: 'Release Tag'
 jobs:
   publish_release:
     runs-on: ubuntu-latest
@@ -18,8 +19,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          tag_name: ${{ github.event.inputs.tags }}
+          release_name: Release ${{ github.event.inputs.tags }}
           body_path: ./update.md
           draft: false
           prerelease: false
