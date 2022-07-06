@@ -1,4 +1,4 @@
 # Latest Updates
 Updated these terms:
-1. yes
+1. add support for windows
 2. no
