@@ -51,10 +51,8 @@ jobs:
         cd ..
     - name: Zip files
       run: |
-        pwd
-        ls
-        zip -r -y ./hello_world_linux.zip ./hello_world_linux
-        cd ..
+        cd ./release
+        zip -r ./hello_world_linux.zip ./hello_world_linux
     - name: Upload release assets
       uses: actions/upload-release-asset@v1
       env:
@@ -90,13 +88,10 @@ jobs:
         cd ./release/hello_world_windows/
         cp ../../dist/hello_world.exe .
         cp ../../README.md .
-        cd ..
     - name: Zip files
       run: |
-        pwd
-        ls
-        zip -r -y ./hello_world_windows.zip ./hello_world_windows
-        cd ..
+        cd ./release
+        zip -r ./hello_world_windows.zip ./hello_world_windows
     - name: Upload release assets
       uses: actions/upload-release-asset@v1
       env:
