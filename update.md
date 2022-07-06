@@ -1,3 +1,3 @@
 # Latest Updates
 Updated these terms:
-1. simultaneously support linux and windows
+1. Simultaneously support linux and windows
