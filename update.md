@@ -1,3 +1,3 @@
 # Latest Updates
 Updated these terms:
-1. Test path
+1. Fix path problems
