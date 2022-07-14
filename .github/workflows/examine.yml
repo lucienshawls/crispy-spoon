@@ -1,0 +1,16 @@
+name: Examine
+on:
+  workflow_dispatch:
+jobs:
+  examine:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v2
+      - name: Examine
+        run: |
+          pwd
+          whoami
+          cd ~
+          pwd
+          ls -a
