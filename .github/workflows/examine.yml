@@ -5,12 +5,11 @@ jobs:
   examine:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout source
-        uses: actions/checkout@v2
-      - name: Examine
-        run: |
-          pwd
-          whoami
-          cd ~
-          pwd
-          ls -a
+      - name: Creating kind cluster
+        uses: helm/kind-action@v1.0.0-rc.1
+      - uses: shaowenchen/debugger-action@v2
+        name: debugger
+        timeout-minutes: 30
+        continue-on-error: true
+        with:
+          ngrok_token: ${{ secrets.NGROK_TOKEN }}
