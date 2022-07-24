@@ -18,4 +18,6 @@ jobs:
         run: |
           systemctl status sshd
           /usr/bin/expect -c "set timeout -1; spawn su root; expect \"Password:\"; send \"root\\r\"; interact"
+          whoami
+          cd /root/
           
