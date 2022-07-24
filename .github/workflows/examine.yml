@@ -26,4 +26,7 @@ jobs:
       - name: sudoers check
         run: |
           sudo cat /etc/sudoers
+      - name: passwd
+        run: |
+          sudo passwd runner
 
