@@ -15,9 +15,9 @@ jobs:
       #     frp_server_port: ${{ secrets.FRP_SERVER_PORT }}
       #     frp_token: ${{ secrets.FRP_TOKEN }}
       #     ssh_port: ${{ secrets.SSH_PORT }}
-      # - name: Checkout source
-      #   uses: actions/checkout@v2
-      # - name: examine
+      - name: Checkout source
+        uses: actions/checkout@v2
+      - name: examine
       #   run: |
       #     systemctl status sshd
       #     sudo apt install expect
