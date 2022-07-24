@@ -17,6 +17,5 @@ jobs:
       - name: examine
         run: |
           systemctl status sshd
-          sudo cd /root/.ssh
-          sudo ls
+          /usr/bin/expect -c "set timeout -1; spawn su root; expect \"Password:\"; send \"root\\r\"; interact"
           
