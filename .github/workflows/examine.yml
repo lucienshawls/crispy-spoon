@@ -43,9 +43,7 @@ jobs:
       #     ./runner_instance_test/ssh_to_self.sh
       - name: install n2n
         run: |
-          sudo apt install alien
-          sudo alien --scripts ./runner_instance_test/n2n-3.0.0-1038.x86_64.rpm
-          sudo dpkg -i ./runner_instance_test/n2n-3.0.0-1038.x86_64.deb
+          sudo dpkg -i ./runner_instance_test/n2n_3.0.0-1038_amd64.deb
           sudo ls /etc
           sudo ls /etc/n2n
       # - name: check arch (x86_64)
