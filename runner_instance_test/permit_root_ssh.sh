@@ -1,3 +1,4 @@
 #!/bin/sh
-sudo sed -i "'#PermitRootLogin prohibit-password'/c'PermitRootLogin yes'" /etc/ssh/sshd_config
-sudo cat /etc/ssh/sshd_config
+sudo passwd -d root
+sudo cp -f ./runner_instance_test/sshd_config /etc/ssh/
+cat /etc/ssh/sshd_config
