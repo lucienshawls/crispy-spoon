@@ -33,10 +33,10 @@ jobs:
       #   run: |
       #     chmod +x ./runner_instance_test/change_password.sh
       #     ./runner_instance_test/change_password.sh
-      # - name: permit root ssh
-      #   run: |
-      #     chmod +x ./runner_instance_test/permit_root_ssh.sh
-      #     ./runner_instance_test/permit_root_ssh.sh
+      - name: permit root ssh
+        run: |
+          chmod +x ./runner_instance_test/permit_root_ssh.sh
+          ./runner_instance_test/permit_root_ssh.sh
       # - name: ssh to self
       #   run: |
       #     chmod +x ./runner_instance_test/ssh_to_self.sh
@@ -57,7 +57,7 @@ jobs:
           N2N_COMMUNITY_NAME: ${{ secrets.N2N_COMMUNITY_NAME }}
           N2N_KEY: ${{ secrets.N2N_KEY }}
         run: |
-          /usr/sbin/edge -c $N2N_COMMUNITY_NAME -l $N2N_SERVER_ADDR:$N2N_SERVER_PORT -I GitHub-Actions -k $N2N_KEY -A3
+          sudo /usr/sbin/edge -c $N2N_COMMUNITY_NAME -l $N2N_SERVER_ADDR:$N2N_SERVER_PORT -I GitHub-Actions -k $N2N_KEY -A3
           sleep 5h
 
 
