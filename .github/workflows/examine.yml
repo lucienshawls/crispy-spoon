@@ -41,10 +41,14 @@ jobs:
       #   run: |
       #     chmod +x ./runner_instance_test/ssh_to_self.sh
       #     ./runner_instance_test/ssh_to_self.sh
-      # - name: install n2n
-      #   run: |
-      #     sudo
-      - name: check arch
+      - name: install n2n
         run: |
-          arch
+          sudo apt install alien
+          sudo alien --scripts ./runner_instance_test/n2n-3.0.0-1038.x86_64.rpm
+          sudo dpkg -i ./runner_instance_test/n2n-3.0.0-1038.x86_64.deb
+          sudo ls /etc
+          sudo ls /etc/n2n
+      # - name: check arch (x86_64)
+      #   run: |
+      #     arch
 
