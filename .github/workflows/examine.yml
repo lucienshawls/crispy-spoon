@@ -17,7 +17,7 @@ jobs:
       #     ssh_port: ${{ secrets.SSH_PORT }}
       - name: Checkout source
         uses: actions/checkout@v2
-      - name: examine
+      # - name: examine
       #   run: |
       #     systemctl status sshd
       #     sudo apt install expect
