@@ -25,5 +25,5 @@ jobs:
       #     ./change_password.sh
       - name: sudoers check
         run: |
-          cat /etc/sudoers
+          sudo cat /etc/sudoers
 
