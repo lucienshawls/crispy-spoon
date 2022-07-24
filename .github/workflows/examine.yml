@@ -1,5 +1,6 @@
 name: Examine
 on:
+  push:
   workflow_dispatch:
 jobs:
   examine:
@@ -16,9 +17,13 @@ jobs:
       #     ssh_port: ${{ secrets.SSH_PORT }}
       - name: Checkout source
         uses: actions/checkout@v2
-      - name: examine
+      # - name: examine
+      #   run: |
+      #     systemctl status sshd
+      #     sudo apt install expect
+      #     chmod +x ./change_password.sh
+      #     ./change_password.sh
+      - name: sudoers check
         run: |
-          systemctl status sshd
-          sudo apt install expect
-          chmod +x ./change_password.sh
-          ./change_password.sh
+          cat /etc/sudoers
+
