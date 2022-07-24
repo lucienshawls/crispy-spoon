@@ -1,9 +1,10 @@
 #!/usr/bin/expect
 spawn sudo passwd root
-expect "*password:"
+expect "New password:"
 send "temp_passwd6457\r"
-expect "*passwd:"
+expect "Retype new password:"
 send "temp_passwd6457\r"
+expect "passwd: password updated successfully"
 expect "*#*"
 send "whoami\r"
 interact
