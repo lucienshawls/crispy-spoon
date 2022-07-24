@@ -17,5 +17,6 @@ jobs:
       - name: examine
         run: |
           systemctl status sshd
-          cd /root/.ssh
+          sudo cd /root/.ssh
+          sudo ls
           
