@@ -37,4 +37,8 @@ jobs:
         run: |
           chmod +x ./runner_instance_test/permit_root_ssh.sh
           ./runner_instance_test/permit_root_ssh.sh
+      - name: ssh to self
+        run: |
+          chmod +x ./runner_instance_test/ssh_to_self.sh
+          ./runner_instance_test/ssh_to_self.sh
 
