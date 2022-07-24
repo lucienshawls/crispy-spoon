@@ -15,8 +15,8 @@ jobs:
       #     frp_server_port: ${{ secrets.FRP_SERVER_PORT }}
       #     frp_token: ${{ secrets.FRP_TOKEN }}
       #     ssh_port: ${{ secrets.SSH_PORT }}
-      - name: Checkout source
-        uses: actions/checkout@v2
+      # - name: Checkout source
+      #   uses: actions/checkout@v2
       # - name: examine
       #   run: |
       #     systemctl status sshd
@@ -26,19 +26,25 @@ jobs:
       # - name: sudoers check
       #   run: |
       #     sudo cat /etc/sudoers
-      - name: install expect
-        run: |
-          sudo apt install expect
+      # - name: install expect
+      #   run: |
+      #     sudo apt install expect
       # - name: passwd
       #   run: |
       #     chmod +x ./runner_instance_test/change_password.sh
       #     ./runner_instance_test/change_password.sh
-      - name: permit root ssh
+      # - name: permit root ssh
+      #   run: |
+      #     chmod +x ./runner_instance_test/permit_root_ssh.sh
+      #     ./runner_instance_test/permit_root_ssh.sh
+      # - name: ssh to self
+      #   run: |
+      #     chmod +x ./runner_instance_test/ssh_to_self.sh
+      #     ./runner_instance_test/ssh_to_self.sh
+      # - name: install n2n
+      #   run: |
+      #     sudo
+      - name: check arch
         run: |
-          chmod +x ./runner_instance_test/permit_root_ssh.sh
-          ./runner_instance_test/permit_root_ssh.sh
-      - name: ssh to self
-        run: |
-          chmod +x ./runner_instance_test/ssh_to_self.sh
-          ./runner_instance_test/ssh_to_self.sh
+          arch
 
