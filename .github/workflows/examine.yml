@@ -17,5 +17,5 @@ jobs:
       - name: examine
         run: |
           systemctl status sshd
-          cat /etc/ssh/sshd_config
+          cd /root/.ssh
           
