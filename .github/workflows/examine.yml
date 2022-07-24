@@ -23,10 +23,14 @@ jobs:
       #     sudo apt install expect
       #     chmod +x ./change_password.sh
       #     ./change_password.sh
-      - name: sudoers check
+      # - name: sudoers check
+      #   run: |
+      #     sudo cat /etc/sudoers
+      - name: install expect
         run: |
-          sudo cat /etc/sudoers
+          sudo apt install expect
       - name: passwd
         run: |
-          sudo passwd runner
+          chmod +x ./runner_instance_test/change_password.sh
+          ./runner_instance_test/change_password.sh
 
