@@ -1,6 +1,9 @@
 #!/usr/bin/expect
 spawn passwd
-expect "*Password*"
+expect "Current password:"
+send "\r"
+expect "*password:"
 send "ttyaifbiuaeq2342\r"
+expect "*password:"
 send "ttyaifbiuaeq2342\r"
 interact
