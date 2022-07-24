@@ -10,7 +10,7 @@ expect eof
 spawn su root
 expect "*Password:"
 send "temp_passwd6457\r"
-expect timeout
+expect "*#*"
 send "whoami\r"
 expect eof
 exit
