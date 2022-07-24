@@ -20,5 +20,5 @@ jobs:
         run: |
           systemctl status sshd
           sudo apt install expect
-          chmod +x ./ssh_login.sh
-          ./ssh_login.sh
+          chmod +x ./switch_to_root.sh
+          ./switch_to_root.sh
