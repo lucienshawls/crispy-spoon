@@ -1,5 +1,4 @@
 #!/usr/bin/expect
-set timeout=30
 spawn su root
 expect "Password*"
 send "root\r"
