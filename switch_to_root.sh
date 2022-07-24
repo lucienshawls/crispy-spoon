@@ -1,7 +1,7 @@
 #!/usr/bin/expect
 spawn su root
 expect "Password:"
-send "root\r"
+send "\r"
 expect "*#*"
 send "whoami\r"
 expect "*#*"
