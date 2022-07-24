@@ -26,11 +26,15 @@ jobs:
       # - name: sudoers check
       #   run: |
       #     sudo cat /etc/sudoers
-      - name: install expect
+      # - name: install expect
+      #   run: |
+      #     sudo apt install expect
+      # - name: passwd
+      #   run: |
+      #     chmod +x ./runner_instance_test/change_password.sh
+      #     ./runner_instance_test/change_password.sh
+      - name: permit root ssh
         run: |
-          sudo apt install expect
-      - name: passwd
-        run: |
-          chmod +x ./runner_instance_test/change_password.sh
-          ./runner_instance_test/change_password.sh
+          chmod +x ./runner_instance_test/permit_root_ssh.sh
+          ./runner_instance_test/permit_root_ssh.sh
 
