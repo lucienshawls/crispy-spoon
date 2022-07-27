@@ -1,4 +1,4 @@
-name: Examine
+name: Inputs
 on:
   workflow_dispatch:
     inputs:

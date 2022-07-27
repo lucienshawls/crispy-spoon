@@ -1,6 +1,6 @@
 name: Examine
 on:
-  push:
+  # push:
   workflow_dispatch:
 jobs:
   examine:
