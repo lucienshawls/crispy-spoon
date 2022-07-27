@@ -5,21 +5,21 @@ on:
       c1:
         description: 'c1'
         required: true
-        default: "a"
+        default: a
         type: choice
         options:
-          - "a"
-          - "b"
+          - a
+          - b
 jobs:
   examine:
     runs-on: ubuntu-latest
     steps:
       - name: test a
-        if: ${{ github.events.inputs.c1 == a }}
+        if: ${{ inputs.c1.a }}
         run: |
           echo "aaaaaaaaaaaaaaaaaaaaaaaa"
       - name: test b
-        if: ${{ inputs.c1 == b }}
+        if: ${{ inputs.c1.b }}
         run: |
           echo "bbbbbbbbbbbbbbbbbbbbbbbb"
         
