@@ -15,11 +15,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: test a
-        if: ${{ inputs.c1 == "a" }}
+        if: ${{ github.events.inputs.c1 == a }}
         run: |
           echo "aaaaaaaaaaaaaaaaaaaaaaaa"
       - name: test b
-        if: ${{ inputs.c1 == "b" }}
+        if: ${{ inputs.c1 == b }}
         run: |
           echo "bbbbbbbbbbbbbbbbbbbbbbbb"
         
