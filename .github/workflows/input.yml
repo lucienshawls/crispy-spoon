@@ -14,17 +14,17 @@ jobs:
   examine:
     runs-on: ubuntu-latest
     steps:
-      # - name: test a
-      #   if: ${{ inputs.c1.a }}
-      #   run: |
-      #     echo "aaaaaaaaaaaaaaaaaaaaaaaa"
-      # - name: test b
-      #   if: ${{ inputs.c1.b }}
-      #   run: |
-      #     echo "bbbbbbbbbbbbbbbbbbbbbbbb"
-      - name: echo
-        env:
-          INP: ${{ inputs.c1 }}
-        run: 
-          echo $INP
+      - name: test a
+        if: ${{ inputs.c1 == 'a' }}
+        run: |
+          echo "aaaaaaaaaaaaaaaaaaaaaaaa"
+      - name: test b
+        if: ${{ inputs.c1 == 'b' }}
+        run: |
+          echo "bbbbbbbbbbbbbbbbbbbbbbbb"
+      # - name: echo
+      #   env:
+      #     INP: ${{ inputs.c1 }}
+      #   run: 
+      #     echo $INP
         
