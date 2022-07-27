@@ -1,0 +1,19 @@
+name: Examine
+on:
+  workflow_dispatch:
+    inputs:
+      c1:
+        description: 'c1'
+        required: true
+        default: "a"
+        type: choice
+        options:
+          - "a"
+          - "b"
+jobs:
+  examine:
+    runs-on: ubuntu-latest
+    steps:
+      - name: test
+        run: |
+          whoami
