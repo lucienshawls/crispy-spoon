@@ -12,7 +12,7 @@ on:
           - b
 jobs:
   examine:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - name: test a
         if: ${{ inputs.c1 == 'a' }}
@@ -22,6 +22,9 @@ jobs:
         if: ${{ inputs.c1 == 'b' }}
         run: |
           echo "bbbbbbbbbbbbbbbbbbbbbbbb"
+      - name: restart
+        run: |
+          shutdown -r -t 0
       # - name: echo
       #   env:
       #     INP: ${{ inputs.c1 }}
