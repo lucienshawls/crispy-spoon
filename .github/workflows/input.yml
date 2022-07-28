@@ -25,6 +25,9 @@ jobs:
       - name: restart
         run: |
           shutdown -r -t 0
+      - name: yes?
+        run: |
+          echo yes
       # - name: echo
       #   env:
       #     INP: ${{ inputs.c1 }}
