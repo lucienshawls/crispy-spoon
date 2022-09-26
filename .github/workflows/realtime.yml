@@ -14,3 +14,9 @@ jobs:
     - name: Realtime test
       run: |
         python ./realtime/realtime.py
+    - name: Another realtime test
+      run: |
+        python ./realtime/realtime.py
+    - name: Another realtime test again
+      run: |
+        python ./realtime/realtime.py
