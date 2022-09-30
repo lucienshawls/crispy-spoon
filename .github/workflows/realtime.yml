@@ -13,10 +13,10 @@ jobs:
         python-version: "3.10"
     - name: Realtime test
       run: |
-        stdbuf -oL python ./realtime/realtime.py
+        stdbuf -o0 python ./realtime/realtime.py
     - name: Another realtime test
       run: |
-        stdbuf -oL python ./realtime/realtime.py
+        stdbuf -o0 python ./realtime/realtime.py
     - name: Another realtime test again
       run: |
-        stdbuf -oL python ./realtime/realtime.py
+        stdbuf -o0 python ./realtime/realtime.py
