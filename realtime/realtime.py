@@ -1,5 +1,7 @@
 import os
-print('value 1')
-os.system('clear')
-print('value 2')
+import time
+print('value 1', end='')
+time.sleep(5)
+print(' value 2', end='')
+time.sleep(5)
 print('value 3')
