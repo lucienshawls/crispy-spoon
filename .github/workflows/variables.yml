@@ -11,7 +11,7 @@ jobs:
         id: generate_variable
         run: |
           export ME=$(whoami)
-          echo "{me}={$ME}" >> $GITHUB_OUTPUT
+          echo "me=$ME" >> $GITHUB_OUTPUT
       - name: Show variables 1
         run: |
           echo ${{ steps.generate_variable.outputs.me }}
