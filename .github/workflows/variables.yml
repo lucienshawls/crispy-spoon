@@ -5,8 +5,6 @@ jobs:
   test_variables:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout source
-        uses: actions/checkout@v2
       - name: Generate variable
         run: |
           echo VERSION1="HOORAY1" >> "$GITHUB_ENV"
