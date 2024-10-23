@@ -1,0 +1,22 @@
+name: Test variables
+on:
+  workflow_dispatch:
+jobs:
+  publish_release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v2
+      - name: Generate variable
+        run: |
+          echo VERSION1="HOORAY1" >> $GITHUB_ENV
+          echo VERSION2="HOORAY2" >> $GITHUB_ENV
+          echo VERSION3="HOORAY3" >> $GITHUB_ENV
+      - name: Show variable
+        env:
+            VERSION1: ${{ env.VERSION1 }}
+            VERSION2: ${{ github.env.VERSION1 }}
+        run: |
+          echo "$VERSION1"
+          echo ${{ env.VERSION2 }}
+          echo ${{ github.env.VERSION3 }}
