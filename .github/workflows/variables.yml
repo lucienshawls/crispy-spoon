@@ -9,11 +9,9 @@ jobs:
         uses: actions/checkout@v2
       - name: Generate variable
         run: |
-          echo VERSION1="HOORAY1" >> $GITHUB_ENV
-          echo VERSION2="HOORAY2" >> $GITHUB_ENV
-          echo VERSION3="HOORAY3" >> $GITHUB_ENV
-      - name: Show variable
-        env:
-            VERSION1: $VERSION1
+          echo VERSION1="HOORAY1" >> "$GITHUB_ENV"
+          echo VERSION2="HOORAY2" >> "$GITHUB_ENV"
+          echo VERSION3="HOORAY3" >> "$GITHUB_ENV"
+      - name: Show variables
         run: |
           echo ${{ env.VERSION1 }}
