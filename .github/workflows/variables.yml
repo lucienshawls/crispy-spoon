@@ -5,11 +5,18 @@ jobs:
   test_variables:
     runs-on: ubuntu-latest
     steps:
+      # - name: Checkout code
+      #   uses: actions/checkout@v4
       - name: Generate variable
+        id: generate_variable
         run: |
-          echo VERSION1="HOORAY1" >> "$GITHUB_ENV"
-          echo VERSION2="HOORAY2" >> "$GITHUB_ENV"
-          echo VERSION3="HOORAY3" >> "$GITHUB_ENV"
-      - name: Show variables
+          export ME=$(whoami)
+          echo "::set-output name=me::$ME"  # 设置步骤输出
+      - name: Show variables 1
         run: |
-          echo ${{ env.VERSION1 }}
+          echo ${{ steps.generate_variable.outputs.me }}
+      - name: Show variables 2
+        env:
+          ME: ${{ steps.generate_variable.outputs.me }}
+        run: |
+          echo ${{ env.ME }}
