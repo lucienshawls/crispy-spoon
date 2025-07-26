@@ -18,7 +18,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Fetch all history for accurate git commands
+          fetch-depth: 0
       - name: Git describe
         run: |
           git describe --dirty --tags --long
