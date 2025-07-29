@@ -166,17 +166,14 @@ jobs:
           LATEST_STABLE_TAG: ${{ needs.check-tag.outputs.LATEST_STABLE_TAG }}
         run: |
           PR_BODY=""
-          echo 'Target PR: ${{ github.event.pull_request.html_url }}' >> $PR_BODY
-          echo '' >> $PR_BODY
-          echo '<details><summary>Debug info</summary>' >> $PR_BODY
-          echo '' >> $PR_BODY
-          echo '```' >> $PR_BODY
-          echo 'new_tag: $NEW_TAG' >> $PR_BODY
-          echo 'latest_tag: $LATEST_TAG' >> $PR_BODY
-          echo 'latest_stable_tag: $LATEST_STABLE_TAG' >> $PR_BODY
-          echo '```' >> $PR_BODY
-          echo '' >> $PR_BODY
-          echo '</details>' >> $PR_BODY
+          PR_BODY+='Target PR: ${{ github.event.pull_request.html_url }}\n'
+          PR_BODY+='<details><summary>Debug info</summary>\n'
+          PR_BODY+='```\n'
+          PR_BODY+='new_tag: ${NEW_TAG}\n'
+          PR_BODY+='latest_tag: ${LATEST_TAG}\n'
+          PR_BODY+='latest_stable_tag: ${LATEST_STABLE_TAG}\n'
+          PR_BODY+='```\n'
+          PR_BODY+='</details>\n'
           echo "PR_BODY=$PR_BODY" >> $GITHUB_ENV
 
       - name: Create changelog PR
