@@ -40,7 +40,7 @@ jobs:
         env:
           LATEST_TAG: ${{ steps.check_cur_commit.outputs.CUR_COMMIT_TAG }}
         run: |
-          echo "ERR_MSG=No updates since last release (${LATEST_TAG}). Closing this PR." >> $GITHUB_OUTPUT
+          echo "ERR_MSG=No updates since last release \`${LATEST_TAG}\`." >> $GITHUB_OUTPUT
 
   check-tag:
     name: Check tag
@@ -114,11 +114,11 @@ jobs:
           LATEST_STABLE_TAG: ${{ env.LATEST_STABLE_TAG }}
         run: |
           if [ "${{ steps.validate_tag.outputs.IS_VALID }}" == "0" ]; then
-            echo "ERR_MSG=Invalid version tag format: ${{ env.NEW_TAG }}" >> $GITHUB_OUTPUT
+            echo "ERR_MSG=Invalid version tag format: \`${{ env.NEW_TAG }}\`." >> $GITHUB_OUTPUT
           elif [ "${{ steps.validate_tag.outputs.IS_NEWER_THAN_LATEST }}" == "0" ]; then
-            echo "ERR_MSG=New tag ${{ env.NEW_TAG }} is not newer than latest tag ${{ env.LATEST_TAG }}" >> $GITHUB_OUTPUT
+            echo "ERR_MSG=New tag \`${{ env.NEW_TAG }}\` is not newer than latest tag \`${{ env.LATEST_TAG }}\`." >> $GITHUB_OUTPUT
           elif [ "${{ steps.validate_tag.outputs.IS_NEWER_THAN_LATEST_STABLE }}" == "0" ]; then
-            echo "ERR_MSG=New tag ${{ env.NEW_TAG }} is not newer than latest stable tag ${{ env.LATEST_STABLE_TAG }}" >> $GITHUB_OUTPUT
+            echo "ERR_MSG=New tag \`${{ env.NEW_TAG }}\` is not newer than latest stable tag \`${{ env.LATEST_STABLE_TAG }}\`." >> $GITHUB_OUTPUT
           fi
 
   generate-changelog:
@@ -228,4 +228,5 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           ERR_MSG: ${{ needs.check-updates.outputs.ERR_MSG || needs.check-tag.outputs.ERR_MSG }}
         run: |
-          gh pr close ${{ github.event.pull_request.number }} -c "$ERR_MSG" -R ${{ github.repository }}
+          COMMENT="${ERR_MSG}\n\nClosing this PR due to errors."
+          gh pr close ${{ github.event.pull_request.number }} -c "$COMMENT" -R ${{ github.repository }}
