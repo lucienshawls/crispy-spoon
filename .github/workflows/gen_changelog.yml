@@ -25,6 +25,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
+          ref: dev
           fetch-depth: 0
 
       - name: Check current commit
@@ -58,6 +59,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
+          ref: dev
           fetch-depth: 0
 
       - name: Extract new tag from PR title
@@ -134,6 +136,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
+          ref: dev
           fetch-depth: 0
 
       - name: Set up python 3.12
@@ -153,7 +156,6 @@ jobs:
           LATEST_STABLE_TAG: ${{ needs.check-tag.outputs.LATEST_STABLE_TAG }}
           IS_VALID: ${{ needs.check-tag.outputs.IS_VALID }}
         run: |
-          git switch dev
           if [ "$IS_VALID" == "1" ]; then
             cz changelog --dry-run --unreleased-version "$NEW_TAG" --start-rev "$LATEST_STABLE_TAG" --merge-prerelease > UPDATE.md
             cz changelog --dry-run --unreleased-version "$NEW_TAG" --merge-prerelease > CHANGELOG.md
@@ -171,21 +173,23 @@ jobs:
           LATEST_STABLE_TAG: ${{ needs.check-tag.outputs.LATEST_STABLE_TAG }}
         run: |
           PR_BODY_FILE="pr_body.md"
-          echo "Target PR: ${{ github.event.pull_request.html_url }}" > $PR_BODY_FILE
-          echo "<details><summary>Debug info</summary>" >> $PR_BODY_FILE
-          echo "```" >> $PR_BODY_FILE
+          {
+            echo "Target PR: ${{ github.event.pull_request.html_url }}"
+            echo "<details><summary>Debug info</summary>"
+            echo "```" >> $PR_BODY_FILE
 
-          if [ "$IS_VALID" == "1" ]; then
-            echo "type: stable release" >> $PR_BODY_FILE
-          elif [ "$IS_VALID" == "2" ]; then
-            echo "type: pre-release" >> $PR_BODY_FILE
-          fi
+            if [ "$IS_VALID" == "1" ]; then
+              echo "type: stable release"
+            elif [ "$IS_VALID" == "2" ]; then
+              echo "type: pre-release"
+            fi
 
-          echo "new_tag: $NEW_TAG" >> $PR_BODY_FILE
-          echo "latest_tag: $LATEST_TAG" >> $PR_BODY_FILE
-          echo "latest_stable_tag: $LATEST_STABLE_TAG" >> $PR_BODY_FILE
-          echo "```" >> $PR_BODY_FILE
-          echo "</details>" >> $PR_BODY_FILE
+            echo "new_tag: $NEW_TAG"
+            echo "latest_tag: $LATEST_TAG"
+            echo "latest_stable_tag: $LATEST_STABLE_TAG"
+            echo "```"
+            echo "</details>" 
+          } > $PR_BODY_FILE
 
           { echo "PR_BODY<<EOF"
             cat "$PR_BODY_FILE"
@@ -216,7 +220,7 @@ jobs:
       contents: read
       pull-requests: write
     steps:
-      - name: Close PR if there is error
+      - name: Close PR if errors occur
         env:
           GITHUB_TOKEN: ${{ github.token }}
           ERR_MSG: ${{ needs.check-updates.outputs.ERR_MSG || needs.check-tag.outputs.ERR_MSG }}
