@@ -156,6 +156,12 @@ jobs:
             cz changelog --dry-run --unreleased-version "$NEW_TAG" --start-rev "$LATEST_TAG" > UPDATE.md
             cz changelog --dry-run --unreleased-version "$NEW_TAG" --start-rev "$LATEST_STABLE_TAG" > CHANGELOG.md
             cz changelog --dry-run --merge-prerelease "$LATEST_STABLE_TAG" >> CHANGELOG.md
+          else
+            echo "Error: Invalid tag format or version."
+            echo "NEW_TAG: $NEW_TAG"
+            echo "LATEST_TAG: $LATEST_TAG"
+            echo "LATEST_STABLE_TAG: $LATEST_STABLE_TAG"
+            exit 1
           fi
 
       - name: Generate PR body
