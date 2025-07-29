@@ -173,7 +173,7 @@ jobs:
           PR_BODY_FILE="pr_body.md"
           echo "Target PR: ${{ github.event.pull_request.html_url }}" > $PR_BODY_FILE
           echo "<details><summary>Debug info</summary>" >> $PR_BODY_FILE
-          # echo "```" >> $PR_BODY_FILE
+          echo "```" >> $PR_BODY_FILE
 
           if [ "$IS_VALID" == "1" ]; then
             echo "type: stable release" >> $PR_BODY_FILE
@@ -184,10 +184,14 @@ jobs:
           echo "new_tag: $NEW_TAG" >> $PR_BODY_FILE
           echo "latest_tag: $LATEST_TAG" >> $PR_BODY_FILE
           echo "latest_stable_tag: $LATEST_STABLE_TAG" >> $PR_BODY_FILE
-          # echo "```" >> $PR_BODY_FILE
+          echo "```" >> $PR_BODY_FILE
           echo "</details>" >> $PR_BODY_FILE
 
-          echo "PR_BODY=$(cat $PR_BODY_FILE)" >> $GITHUB_ENV
+          { echo "PR_BODY<<EOF"
+            cat "$PR_BODY_FILE"
+            echo "EOF"
+          } >> "$GITHUB_ENV"
+
           rm -f $PR_BODY_FILE
 
       - name: Create changelog PR
