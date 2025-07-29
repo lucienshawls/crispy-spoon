@@ -26,9 +26,11 @@ jobs:
         if: ${{ github.event.inputs.condition01 == '' }}
         run: |
           echo "ERR_MSG=Condition for job01 is empty, skipping job01." >> $GITHUB_OUTPUT
+
   job02:
     needs: 
       - job01
+    if: ${{ needs.job01.outputs.ERR_MSG == '' }}
     runs-on: ubuntu-latest
     outputs:
       ERR_MSG: ${{ steps.j02.outputs.ERR_MSG }}
@@ -55,6 +57,11 @@ jobs:
     if: ${{ needs.job01.outputs.ERR_MSG != '' || needs.job02.outputs.ERR_MSG != '' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Fail
+      - name: Fail1
         run: |
-          echo "Fail! J01: ${{ needs.job01.outputs.ERR_MSG }} J02:${{ needs.job02.outputs.ERR_MSG }}"
+          echo "Fail! J01: ${{ needs.job01.outputs.ERR_MSG }} J02: ${{ needs.job02.outputs.ERR_MSG }}"
+      - name: Fail2
+        env:
+          ERR_MSG: ${{ needs.job01.outputs.ERR_MSG || needs.job02.outputs.ERR_MSG }}
+        run: |
+          echo "$ERR_MSG"
