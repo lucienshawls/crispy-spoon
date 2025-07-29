@@ -54,7 +54,7 @@ jobs:
     needs:
       - job01
       - job02
-    if: ${{ needs.job01.outputs.ERR_MSG != '' || needs.job02.outputs.ERR_MSG != '' }}
+    if: ${{ always() && (needs.job01.outputs.ERR_MSG != '' || needs.job02.outputs.ERR_MSG != '') }}
     runs-on: ubuntu-latest
     steps:
       - name: Fail1
