@@ -1,0 +1,19 @@
+name: Close PR
+on:
+  pull_request:
+    types: 
+      - opened
+
+jobs:
+  close-pr:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Close this PR
+        run: |
+          gh pr close ${{ github.event.pull_request.number }}
