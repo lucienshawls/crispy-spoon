@@ -171,21 +171,21 @@ jobs:
           LATEST_STABLE_TAG: ${{ needs.check-tag.outputs.LATEST_STABLE_TAG }}
         run: |
           PR_BODY_FILE="pr_body.md"
-          echo "Target PR: ${{ github.event.pull_request.html_url }}" > $PR_BODY_FILE
-          echo "<details><summary>Debug info</summary>" >> $PR_BODY_FILE
-          echo "```" >> $PR_BODY_FILE
+          echo "Target PR: ${{ github.event.pull_request.html_url }}" > "$PR_BODY_FILE"
+          echo "<details><summary>Debug info</summary>" >> "$PR_BODY_FILE"
+          echo "```" >> "$PR_BODY_FILE"
 
           if [ "$IS_VALID" == "1" ]; then
-            echo "type: stable release" >> $PR_BODY_FILE
+            echo "type: stable release" >> "$PR_BODY_FILE"
           elif [ "$IS_VALID" == "2" ]; then
-            echo "type: pre-release" >> $PR_BODY_FILE
+            echo "type: pre-release" >> "$PR_BODY_FILE"
           fi
 
-          echo "new_tag: ${NEW_TAG}" >> $PR_BODY_FILE
-          echo "latest_tag: ${LATEST_TAG}" >> $PR_BODY_FILE
-          echo "latest_stable_tag: ${LATEST_STABLE_TAG}" >> $PR_BODY_FILE
-          echo "```" >> $PR_BODY_FILE
-          echo "</details>" >> $PR_BODY_FILE
+          echo "new_tag: ${NEW_TAG}" >> "$PR_BODY_FILE"
+          echo "latest_tag: ${LATEST_TAG}" >> "$PR_BODY_FILE"
+          echo "latest_stable_tag: ${LATEST_STABLE_TAG}" >> "$PR_BODY_FILE"
+          echo "```" >> "$PR_BODY_FILE"
+          echo "</details>" >> "$PR_BODY_FILE"
 
           echo "PR_BODY=$(cat $PR_BODY_FILE)" >> $GITHUB_ENV
           rm -f $PR_BODY_FILE
