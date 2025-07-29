@@ -176,7 +176,7 @@ jobs:
           {
             echo "Target PR: ${{ github.event.pull_request.html_url }}"
             echo "<details><summary>Debug info</summary>"
-            echo "```" >> $PR_BODY_FILE
+            echo "```"
 
             if [ "$IS_VALID" == "1" ]; then
               echo "type: stable release"
