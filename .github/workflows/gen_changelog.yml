@@ -55,6 +55,11 @@ jobs:
       ERR_MSG: ${{ steps.set_err_msg.outputs.ERR_MSG }}
     
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Extract new tag from PR title
         run: |
           title="${{ github.event.pull_request.title }}"
@@ -108,7 +113,6 @@ jobs:
           elif [ "${{ steps.validate_tag.outputs.IS_NEWER_THAN_LATEST_STABLE }}" == "0" ]; then
             echo "ERR_MSG=New tag ${{ env.NEW_TAG }} is not newer than latest stable tag ${{ env.LATEST_STABLE_TAG }}" >> $GITHUB_OUTPUT
           fi
-  
 
   generate-changelog:
     name: Generate changelog PR
@@ -153,7 +157,7 @@ jobs:
             cz changelog --dry-run --unreleased-version "$NEW_TAG" --start-rev "$LATEST_STABLE_TAG" > CHANGELOG.md
             cz changelog --dry-run --merge-prerelease "$LATEST_STABLE_TAG" >> CHANGELOG.md
           fi
-      
+
       - name: Generate PR body
         id: generate_pr_body
         env:
