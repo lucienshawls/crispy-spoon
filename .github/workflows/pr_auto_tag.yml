@@ -19,6 +19,11 @@ jobs:
           ref: master
           fetch-depth: 0
 
+      - name: Git config
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
       - name: Extract new tag from PR title
         run: |
           title="${{ github.event.pull_request.title }}"
