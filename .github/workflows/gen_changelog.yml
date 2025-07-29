@@ -190,7 +190,7 @@ jobs:
           { echo "PR_BODY<<EOF"
             cat "$PR_BODY_FILE"
             echo "EOF"
-          } >> "$GITHUB_ENV"
+          } >> "$GITHUB_OUTPUT"
 
           rm -f $PR_BODY_FILE
 
@@ -203,7 +203,7 @@ jobs:
           base: dev
           sign-commits: true
           title: "docs: auto update changelogs for ${{ needs.check-tag.outputs.NEW_TAG }}"
-          body: "$PR_BODY"
+          body: "${{ steps.generate_pr_body.outputs.PR_BODY }}"
 
   close-pr:
     name: Close PR if there is error
