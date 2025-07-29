@@ -8,7 +8,7 @@ jobs:
   close-pr:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
       pull-requests: write
     steps:
       # - name: Checkout
@@ -18,4 +18,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
-          gh pr close ${{ github.event.pull_request.number }}
+          gh pr close ${{ github.event.pull_request.number }} -c "Auto close" -R ${{ github.repository }}
