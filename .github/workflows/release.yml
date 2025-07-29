@@ -41,9 +41,8 @@ jobs:
           if [ ! -f UPDATE.md ]; then
             echo "" > UPDATE.md
           fi
-          echo "Release notes for ${{ github.ref_name }}" > release_notes.md
           if [ "${{ steps.check_prerelease.outputs.is_valid }}" == "2" ]; then
-            echo "This is a pre-release, files will not be uploaded to pypi." >> release_notes.md
+            echo "Notice: This is a pre-release, files will not be uploaded to [PyPI](https://pypi.org/)." >> release_notes.md
           fi
           cat UPDATE.md >> release_notes.md
 
