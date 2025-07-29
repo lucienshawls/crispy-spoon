@@ -1,0 +1,37 @@
+name: Auto Tag Release PR
+
+on:
+  pull_request:
+    branches:
+      - master
+    types:
+      - closed
+
+jobs:
+  auto_tag_release:
+    if: github.event.pull_request.merged == true && (startsWith(github.event.pull_request.title, 'Release v'))
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+
+      - name: Extract new tag from PR title
+        run: |
+          title="${{ github.event.pull_request.title }}"
+          NEW_TAG=$(echo "$title" | sed -E "s/([Rr]elease)//" | sed -e "s/^[[:space:]]*//" -e "s/[[:space:]]*$//")
+          echo "NEW_TAG=$NEW_TAG" >> $GITHUB_ENV
+
+      - name: Create release tag and push
+        run: |
+          git tag -a "$NEW_TAG" -m "${{ github.event.pull_request.title }}" -f
+          git push origin "$NEW_TAG"
+
+      - name: Merge into dev and push
+        run: |
+          git switch dev
+          git merge "$NEW_TAG"
+          git push origin dev
