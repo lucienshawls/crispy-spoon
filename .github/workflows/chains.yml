@@ -1,0 +1,67 @@
+name: Chains
+on:
+  workflow_dispatch:
+    inputs:
+      condition:
+        description: 'Name of the chain to run'
+        required: true
+        default: '19260817'
+      condition01:
+        description: 'Condition for job01, empty means error'
+        required: false
+        default: ''
+      condition02:
+        description: 'Condition for job02, empty means error'
+        required: false
+        default: ''
+jobs:
+  job01:
+    if: ${{ github.event.inputs.condition == '19260817' }}
+    runs-on: ubuntu-latest
+    outputs:
+      ERR_MSG: ${{ steps.j01.outputs.ERR_MSG }}
+    steps:
+      - name: J01
+        id: j01
+        if: ${{ github.event.inputs.condition01 == '' }}
+        run: |
+          echo "ERR_MSG=Condition for job01 is empty, skipping job01." >> $GITHUB_OUTPUT
+
+  job02:
+    needs: 
+      - job01
+    if: ${{ needs.job01.outputs.ERR_MSG == '' }}
+    runs-on: ubuntu-latest
+    outputs:
+      ERR_MSG: ${{ steps.j02.outputs.ERR_MSG }}
+    steps:
+      - name: J02
+        id: j02
+        if: ${{ github.event.inputs.condition02 == '' }}
+        run: |
+          echo "ERR_MSG=Condition for job02 is empty, skipping job02." >> $GITHUB_OUTPUT
+  job03:
+    needs:
+      - job01
+      - job02
+    if: ${{ needs.job01.outputs.ERR_MSG == '' && needs.job02.outputs.ERR_MSG == '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pass
+        run: |
+          echo "Pass!"
+  job04:
+    needs:
+      - job01
+      - job02
+    if: ${{ always() && (needs.job01.outputs.ERR_MSG != '' || needs.job02.outputs.ERR_MSG != '') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail1
+        run: |
+          echo "Fail! J01: ${{ needs.job01.outputs.ERR_MSG }} J02: ${{ needs.job02.outputs.ERR_MSG }}"
+      - name: Fail2
+        env:
+          ERR_MSG: ${{ needs.job01.outputs.ERR_MSG || needs.job02.outputs.ERR_MSG }}
+        run: |
+          echo "$ERR_MSG"
