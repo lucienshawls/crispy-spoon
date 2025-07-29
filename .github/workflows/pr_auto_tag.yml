@@ -21,6 +21,7 @@ jobs:
         with:
           ref: master
           fetch-depth: 0
+          token: ${{ secrets.PYCONFIGWEBUI_RELEASE }}
 
       - name: Git config
         run: |
