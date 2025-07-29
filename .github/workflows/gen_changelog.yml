@@ -98,6 +98,8 @@ jobs:
           echo "IS_NEWER_THAN_LATEST=$($CHECKER_CMD $NEW_TAG $LATEST_TAG)" >> $GITHUB_OUTPUT
           echo "IS_NEWER_THAN_LATEST_STABLE=$($CHECKER_CMD $NEW_TAG $LATEST_STABLE_TAG)" >> $GITHUB_OUTPUT
 
+          echo "IS_VALID=$IS_VALID"
+
       - name: Set error message
         id: set_err_msg
         if: ${{ steps.validate_tag.outputs.IS_VALID == '0' || steps.validate_tag.outputs.IS_NEWER_THAN_LATEST == '0' }}
@@ -149,10 +151,13 @@ jobs:
           IS_VALID: ${{ needs.check-tag.outputs.IS_VALID }}
         run: |
           git switch dev
+          echo "IS_VALID=$IS_VALID"
           if [ "$IS_VALID" == "1" ]; then
+            echo "Stable release detected."
             cz changelog --dry-run --unreleased-version "$NEW_TAG" --start-rev "$LATEST_STABLE_TAG" --merge-prerelease > UPDATE.md
             cz changelog --dry-run --unreleased-version "$NEW_TAG" --merge-prerelease > CHANGELOG.md
           elif [ "$IS_VALID" == "2" ]; then
+            echo "Pre-release detected."
             cz changelog --dry-run --unreleased-version "$NEW_TAG" --start-rev "$LATEST_TAG" > UPDATE.md
             cz changelog --dry-run --unreleased-version "$NEW_TAG" --start-rev "$LATEST_STABLE_TAG" > CHANGELOG.md
             cz changelog --dry-run --merge-prerelease "$LATEST_STABLE_TAG" >> CHANGELOG.md
