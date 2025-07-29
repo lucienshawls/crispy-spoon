@@ -1,0 +1,205 @@
+name: Generate changelog PR
+
+on:
+  pull_request:
+    types: 
+      - opened
+      - reopened
+      - ready_for_review
+    branches: 
+      - master
+
+jobs:
+  check-updates:
+    name: Check for updates since last release
+    if: >
+      github.event.pull_request.draft == false &&
+      startsWith(github.event.pull_request.title, 'Release v') &&
+      github.event.pull_request.base.ref == 'master' &&
+      github.event.pull_request.head.ref == 'dev'
+    runs-on: ubuntu-latest
+    outputs:
+      ERR_MSG: ${{ steps.set_err_msg.outputs.ERR_MSG }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check current commit
+        id: check_cur_commit
+        run: |
+          CUR_COMMIT_TAG=$(git tag --list "v*" --contains)
+          echo "CUR_COMMIT_TAG=$CUR_COMMIT_TAG" >> $GITHUB_OUTPUT
+
+      - name: Set error message
+        if: ${{ steps.check_cur_commit.outputs.CUR_COMMIT_TAG != '' }}
+        id: set_err_msg
+        env:
+          LATEST_TAG: ${{ steps.check_cur_commit.outputs.CUR_COMMIT_TAG }}
+        run: |
+          echo "ERR_MSG=No updates since last release (${LATEST_TAG}). Closing this PR." >> $GITHUB_OUTPUT
+
+  check-tag:
+    name: Check tag
+    needs: 
+      - check-updates
+    if: ${{ needs.check-updates.outputs.ERR_MSG == '' }}
+    runs-on: ubuntu-latest
+    outputs:
+      NEW_TAG: ${{ steps.validate_tag.outputs.NEW_TAG }}
+      LATEST_TAG: ${{ steps.validate_tag.outputs.LATEST_TAG }}
+      LATEST_STABLE_TAG: ${{ steps.validate_tag.outputs.LATEST_STABLE_TAG }}
+      IS_VALID: ${{ steps.validate_tag.outputs.IS_VALID }}
+      ERR_MSG: ${{ steps.set_err_msg.outputs.ERR_MSG }}
+    
+    steps:
+      - name: Extract new tag from PR title
+        run: |
+          title="${{ github.event.pull_request.title }}"
+          NEW_TAG=$(echo "$title" | sed -E 's/([Rr]elease)//' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+          echo "NEW_TAG=$NEW_TAG" >> $GITHUB_ENV
+      
+      - name: Get latest tag
+        run: |
+          LATEST_TAG=$(git describe --tags --abbrev=0 --match "v*")
+          echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_ENV
+
+      - name: Get latest stable tag
+        run: |
+          LATEST_STABLE_TAG=$(git describe --tags --abbrev=0 --match "v*" --exclude "v*-*")
+          echo "LATEST_STABLE_TAG=$LATEST_STABLE_TAG" >> $GITHUB_ENV
+
+      - name: Set up python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Check if new tag is valid
+        id: validate_tag
+        env:
+          NEW_TAG: ${{ env.NEW_TAG }}
+          LATEST_TAG: ${{ env.LATEST_TAG }}
+          LATEST_STABLE_TAG: ${{ env.LATEST_STABLE_TAG }}
+          CHECKER_CMD: "python check_tag.py"
+
+        # ISVALID: 0=invalid, 1=stable, 2=pre-release
+        run: |
+          echo "NEW_TAG=$NEW_TAG" >> $GITHUB_OUTPUT
+          echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_OUTPUT
+          echo "LATEST_STABLE_TAG=$LATEST_STABLE_TAG" >> $GITHUB_OUTPUT
+          echo "IS_VALID=$($CHECKER_CMD $NEW_TAG)" >> $GITHUB_OUTPUT
+          echo "IS_NEWER_THAN_LATEST=$($CHECKER_CMD $NEW_TAG $LATEST_TAG)" >> $GITHUB_OUTPUT
+          echo "IS_NEWER_THAN_LATEST_STABLE=$($CHECKER_CMD $NEW_TAG $LATEST_STABLE_TAG)" >> $GITHUB_OUTPUT
+
+      - name: Set error message
+        id: set_err_msg
+        if: ${{ steps.validate_tag.outputs.IS_VALID == '0' || steps.validate_tag.outputs.IS_NEWER_THAN_LATEST == '0' }}
+        env:
+          NEW_TAG: ${{ env.NEW_TAG }}
+          LATEST_TAG: ${{ env.LATEST_TAG }}
+          LATEST_STABLE_TAG: ${{ env.LATEST_STABLE_TAG }}
+        run: |
+          if [ "${{ steps.validate_tag.outputs.IS_VALID }}" == "0" ]; then
+            echo "ERR_MSG=Invalid version tag format: ${{ env.NEW_TAG }}" >> $GITHUB_OUTPUT
+          elif [ "${{ steps.validate_tag.outputs.IS_NEWER_THAN_LATEST }}" == "0" ]; then
+            echo "ERR_MSG=New tag ${{ env.NEW_TAG }} is not newer than latest tag ${{ env.LATEST_TAG }}" >> $GITHUB_OUTPUT
+          elif [ "${{ steps.validate_tag.outputs.IS_NEWER_THAN_LATEST_STABLE }}" == "0" ]; then
+            echo "ERR_MSG=New tag ${{ env.NEW_TAG }} is not newer than latest stable tag ${{ env.LATEST_STABLE_TAG }}" >> $GITHUB_OUTPUT
+          fi
+  
+
+  generate-changelog:
+    name: Generate changelog PR
+    needs:
+      - check-updates
+      - check-tag
+    if: ${{ needs.check-updates.outputs.ERR_MSG == '' && needs.check-tag.outputs.ERR_MSG == '' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install commitizen
+
+      - name: Generate release notes and changelog
+        env: 
+          NEW_TAG: ${{ needs.check-tag.outputs.NEW_TAG }}
+          LATEST_TAG: ${{ needs.check-tag.outputs.LATEST_TAG }}
+          LATEST_STABLE_TAG: ${{ needs.check-tag.outputs.LATEST_STABLE_TAG }}
+          IS_VALID: ${{ needs.check-tag.outputs.IS_VALID }}
+        run: |
+          git switch dev
+          if [ "$IS_VALID" == "1" ]; then
+            cz changelog --dry-run --unreleased-version "$NEW_TAG" --start-rev "$LATEST_STABLE_TAG" --merge-prerelease > UPDATE.md
+            cz changelog --dry-run --unreleased-version "$NEW_TAG" --merge-prerelease > CHANGELOG.md
+          elif [ "$IS_VALID" == "2" ]; then
+            cz changelog --dry-run --unreleased-version "$NEW_TAG" --start-rev "$LATEST_TAG" > UPDATE.md
+            cz changelog --dry-run --unreleased-version "$NEW_TAG" --start-rev "$LATEST_STABLE_TAG" > CHANGELOG.md
+            cz changelog --dry-run --merge-prerelease "$LATEST_STABLE_TAG" >> CHANGELOG.md
+          fi
+      
+      - name: Generate PR body
+        id: generate_pr_body
+        env:
+          NEW_TAG: ${{ needs.check-tag.outputs.NEW_TAG }}
+          LATEST_TAG: ${{ needs.check-tag.outputs.LATEST_TAG }}
+          LATEST_STABLE_TAG: ${{ needs.check-tag.outputs.LATEST_STABLE_TAG }}
+        run: |
+          PR_BODY=""
+          echo 'Target PR: ${{ github.event.pull_request.html_url }}' >> $PR_BODY
+          echo '' >> $PR_BODY
+          echo '<details><summary>Debug info</summary>' >> $PR_BODY
+          echo '' >> $PR_BODY
+          echo '```' >> $PR_BODY
+          echo 'new_tag: $NEW_TAG' >> $PR_BODY
+          echo 'latest_tag: $LATEST_TAG' >> $PR_BODY
+          echo 'latest_stable_tag: $LATEST_STABLE_TAG' >> $PR_BODY
+          echo '```' >> $PR_BODY
+          echo '' >> $PR_BODY
+          echo '</details>' >> $PR_BODY
+          echo "PR_BODY=$PR_BODY" >> $GITHUB_ENV
+
+      - name: Create changelog PR
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: "docs: auto update changelogs for ${{ needs.check-tag.outputs.NEW_TAG }}"
+          branch: changelog
+          delete-branch: true
+          base: dev
+          sign-commits: true
+          title: "docs: auto update changelogs for ${{ needs.check-tag.outputs.NEW_TAG }}"
+          body: "$PR_BODY"
+
+  close-pr:
+    name: Close PR if there is error
+    needs:
+      - check-updates
+      - check-tag
+    if: ${{ always() && (needs.check-updates.outputs.ERR_MSG != '' || needs.check-tag.outputs.ERR_MSG != '') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Close PR if there is error
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          ERR_MSG: ${{ needs.check-updates.outputs.ERR_MSG || needs.check-tag.outputs.ERR_MSG }}
+        run: |
+          gh pr close ${{ github.event.pull_request.number }} -c "$ERR_MSG" -R ${{ github.repository }}
