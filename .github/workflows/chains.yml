@@ -56,7 +56,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Fail
-        env:
-          ERR_MSG: ${{ needs.job01.outputs.ERR_MSG || needs.job02.outputs.ERR_MSG }}
         run: |
-          echo "Fail! ${ERR_MSG}"
+          echo "Fail! J01: ${{ needs.job01.outputs.ERR_MSG }} J02:${{ needs.job02.outputs.ERR_MSG }}"
