@@ -1,0 +1,57 @@
+name: Build and Publish
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build_and_publish:
+    name: Build and Publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install --upgrade packaging
+      
+      - name: Determine pre-release status
+        id: check_prerelease
+        env:
+          CHECKER_CMD: "python check_tag.py"
+        run: |
+          IS_VALID=$($CHECKER_CMD "${{ github.ref_name }}")
+          echo "IS_VALID=$IS_VALID" >> $GITHUB_OUTPUT
+      
+      - name: Prepare release notes
+        run: |
+          if [ ! -f UPDATE.md ]; then
+            echo "" > UPDATE.md
+          fi
+          echo "Release notes for ${{ github.ref_name }}" > release_notes.md
+          if [ "${{ steps.check_prerelease.outputs.is_valid }}" == "2" ]; then
+            echo "This is a pre-release, files will not be uploaded to pypi." >> release_notes.md
+          fi
+          cat UPDATE.md >> release_notes.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: release_notes.md
+          prerelease: ${{ steps.check_prerelease.outputs.is_valid == '2' }}
+          name: Release ${{ github.ref_name }}
+          make_latest: ${{ steps.check_prerelease.outputs.is_valid == '1' }}
+          generate_release_notes: true

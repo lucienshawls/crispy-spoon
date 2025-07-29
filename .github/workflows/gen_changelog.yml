@@ -155,14 +155,17 @@ jobs:
           LATEST_TAG: ${{ needs.check-tag.outputs.LATEST_TAG }}
           LATEST_STABLE_TAG: ${{ needs.check-tag.outputs.LATEST_STABLE_TAG }}
           IS_VALID: ${{ needs.check-tag.outputs.IS_VALID }}
+
+        # Due to the bug in commitizen, we currently do not generate the full changelog when the new tag is a pre-release.
         run: |
           if [ "$IS_VALID" == "1" ]; then
-            cz changelog --dry-run --unreleased-version "$NEW_TAG" --start-rev "$LATEST_STABLE_TAG" --merge-prerelease > UPDATE.md
-            cz changelog --dry-run --unreleased-version "$NEW_TAG" --merge-prerelease > CHANGELOG.md
+            cz ch --dry-run --unreleased-version "$NEW_TAG" --start-rev "$LATEST_STABLE_TAG" --merge-prerelease > UPDATE.md
+            cz ch --dry-run --unreleased-version "$NEW_TAG" --merge-prerelease > CHANGELOG.md
           elif [ "$IS_VALID" == "2" ]; then
-            cz changelog --dry-run --unreleased-version "$NEW_TAG" --start-rev "$LATEST_TAG" > UPDATE.md
-            cz changelog --dry-run --unreleased-version "$NEW_TAG" --start-rev "$LATEST_STABLE_TAG" > CHANGELOG.md
-            cz changelog --dry-run --merge-prerelease "$LATEST_STABLE_TAG" >> CHANGELOG.md
+            cz ch --dry-run --unreleased-version "$NEW_TAG" --start-rev "$LATEST_TAG" > UPDATE.md
+
+            # cz ch --dry-run --unreleased-version "$NEW_TAG" --start-rev "$LATEST_STABLE_TAG" > CHANGELOG.md
+            # cz ch --dry-run --merge-prerelease "$LATEST_STABLE_TAG" >> CHANGELOG.md
           fi
 
       - name: Generate PR body
@@ -213,7 +216,7 @@ jobs:
           body: "${{ steps.generate_pr_body.outputs.PR_BODY }}"
 
   close-pr:
-    name: Close PR if there is error
+    name: Close PR if errors occur
     needs:
       - check-updates
       - check-tag
@@ -228,5 +231,5 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           ERR_MSG: ${{ needs.check-updates.outputs.ERR_MSG || needs.check-tag.outputs.ERR_MSG }}
         run: |
-          COMMENT="${ERR_MSG}\n\nClosing this PR due to errors."
+          COMMENT="${ERR_MSG} Closing this PR."
           gh pr close ${{ github.event.pull_request.number }} -c "$COMMENT" -R ${{ github.repository }}
