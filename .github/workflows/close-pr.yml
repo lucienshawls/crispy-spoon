@@ -7,9 +7,9 @@ on:
 jobs:
   close-pr:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
+    # permissions:
+    #   contents: write
+    #   pull-requests: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -17,3 +17,5 @@ jobs:
       - name: Close this PR
         run: |
           gh pr close ${{ github.event.pull_request.number }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
