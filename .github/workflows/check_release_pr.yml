@@ -14,6 +14,8 @@ jobs:
       startsWith(github.event.pull_request.title, 'Release v') &&
       github.event.pull_request.base.ref == 'master'
     runs-on: ubuntu-latest
+    outputs:
+      READY: ${{ steps.check_version.outputs.READY }}
     steps:
       - name: Verify PR head branch
         run: |
@@ -34,9 +36,11 @@ jobs:
           echo "NEW_TAG=$NEW_TAG" >> $GITHUB_ENV
 
       - name: Compare versions
+        id: check_version
         continue-on-error: true
         run: |
           if [ ! -f "VERSION.md" ]; then
+            echo "READY=0" >> $GITHUB_OUTPUT
             echo "::error::VERSION.md file not found."
             exit 1
           fi
@@ -45,21 +49,20 @@ jobs:
           PR_VERSION="$NEW_TAG"
           
           if [ "$FILE_VERSION" != "$PR_VERSION" ]; then
-            echo "::error::Version mismatch. Please merge the changelog PR first."
+            echo "READY=0" >> $GITHUB_OUTPUT
+            echo "::error::Version mismatch."
             exit 1
           fi
+          echo "READY=1" >> $GITHUB_OUTPUT
 
   set_to_draft:
     name: Set release PR to draft
     needs: check_if_release_ready
     if: >
-      needs.check_if_release_ready.result == 'failure' &&
-      github.event.pull_request.head.ref == 'dev' &&
-      github.event.pull_request.draft == false
+      needs.check_if_release_ready.outputs.READY == '0' &&
+      github.event.pull_request.head.ref == 'dev'
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: write
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -68,21 +71,23 @@ jobs:
 
       - name: Set PR to draft
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PYCONFIGWEBUI_RELEASE }}
         run: |
-          gh pr edit ${{ github.event.pull_request.number }} --draft
+          gh pr ready ${{ github.event.pull_request.number }} --undo
+
+      - name: Fail the workflow
+        run: |
+          echo "::error::Release is not ready. Please merge the changelog PR first."
+          exit 1
 
   auto_merge_release_pr:
     name: Auto Merge Release PR
     needs: check_if_release_ready
     if: >
-      needs.check_if_release_ready.result == 'success' &&
+      needs.check_if_release_ready.outputs.READY == '1' &&
       github.event.pull_request.head.ref == 'dev' &&
       github.event.pull_request.draft == false
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
 
     steps:
       - name: Checkout code

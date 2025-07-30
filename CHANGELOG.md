@@ -1,4 +1,31 @@
+## v13.0.3-beta.5 (2025-07-30)
+
+### Refactor
+
+- 添加信息
+- 移除文件
+
+## v13.0.3-beta.4 (2025-07-30)
+
+### Refactor
+
+- something else
+
+## v13.0.3-beta.3 (2025-07-30)
+
+### Feat
+
+- new hello
+
+### Fix
+
+- try something else
+
 ## v13.0.3-beta.2 (2025-07-30)
+
+### Feat
+
+- new feature
 
 ## v13.0.3-beta.1 (2025-07-30)
 
