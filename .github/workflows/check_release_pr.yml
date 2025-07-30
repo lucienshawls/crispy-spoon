@@ -76,7 +76,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh pr edit ${{ github.event.pull_request.number }} --draft
+          gh pr ready ${{ github.event.pull_request.number }} --undo
 
       - name: Fail the workflow
         run: |
