@@ -10,8 +10,8 @@ on:
       - master
 
 jobs:
-  check-updates:
-    name: Check for updates since last release
+  check:
+    name: Perform checks
     if: >
       github.event.pull_request.draft == false &&
       startsWith(github.event.pull_request.title, 'Release v') &&
@@ -19,6 +19,11 @@ jobs:
       github.event.pull_request.head.ref == 'dev'
     runs-on: ubuntu-latest
     outputs:
+      NEW_TAG: ${{ steps.info.outputs.NEW_TAG }}
+      LATEST_TAG: ${{ steps.info.outputs.LATEST_TAG }}
+      LATEST_STABLE_TAG: ${{ steps.info.outputs.LATEST_STABLE_TAG }}
+      IS_VALID: ${{ steps.check_tag.outputs.IS_VALID }}
+      IS_BETA: ${{ steps.check_tag.outputs.IS_BETA }}
       ERR_MSG: ${{ steps.set_err_msg.outputs.ERR_MSG }}
 
     steps:
@@ -28,39 +33,10 @@ jobs:
           ref: dev
           fetch-depth: 0
 
-      - name: Check current commit
-        id: check_cur_commit
+      - name: Get current commit tag
         run: |
           CUR_COMMIT_TAG=$(git tag --list "v*" --contains)
-          echo "CUR_COMMIT_TAG=$CUR_COMMIT_TAG" >> $GITHUB_OUTPUT
-
-      - name: Set error message
-        if: ${{ steps.check_cur_commit.outputs.CUR_COMMIT_TAG != '' }}
-        id: set_err_msg
-        env:
-          LATEST_TAG: ${{ steps.check_cur_commit.outputs.CUR_COMMIT_TAG }}
-        run: |
-          echo "ERR_MSG=No updates since last release \`${LATEST_TAG}\`." >> $GITHUB_OUTPUT
-
-  check-tag:
-    name: Check tag
-    needs: 
-      - check-updates
-    if: ${{ needs.check-updates.outputs.ERR_MSG == '' }}
-    runs-on: ubuntu-latest
-    outputs:
-      NEW_TAG: ${{ steps.validate_tag.outputs.NEW_TAG }}
-      LATEST_TAG: ${{ steps.validate_tag.outputs.LATEST_TAG }}
-      LATEST_STABLE_TAG: ${{ steps.validate_tag.outputs.LATEST_STABLE_TAG }}
-      IS_VALID: ${{ steps.validate_tag.outputs.IS_VALID }}
-      ERR_MSG: ${{ steps.set_err_msg.outputs.ERR_MSG }}
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          ref: dev
-          fetch-depth: 0
+          echo "CUR_COMMIT_TAG=$CUR_COMMIT_TAG" >> $GITHUB_ENV
 
       - name: Extract new tag from PR title
         run: |
@@ -78,55 +54,63 @@ jobs:
           LATEST_STABLE_TAG=$(git describe --tags --abbrev=0 --match "v*" --exclude "v*-*")
           echo "LATEST_STABLE_TAG=$LATEST_STABLE_TAG" >> $GITHUB_ENV
 
+      - name: Gather information
+        id: info
+        run: |
+          echo "CUR_COMMIT_TAG=$CUR_COMMIT_TAG" >> $GITHUB_ENV
+
+          echo "NEW_TAG=$NEW_TAG" >> $GITHUB_OUTPUT
+          echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_OUTPUT
+          echo "LATEST_STABLE_TAG=$LATEST_STABLE_TAG" >> $GITHUB_OUTPUT
+
       - name: Set up python 3.12
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install packaging
-
       - name: Check if new tag is valid
-        id: validate_tag
+        id: check_tag
         env:
-          NEW_TAG: ${{ env.NEW_TAG }}
-          LATEST_TAG: ${{ env.LATEST_TAG }}
-          LATEST_STABLE_TAG: ${{ env.LATEST_STABLE_TAG }}
+          NEW_TAG: ${{ steps.info.outputs.NEW_TAG }}
+          LATEST_TAG: ${{ steps.info.outputs.LATEST_TAG }}
+          CUR_COMMIT_TAG: ${{ env.CUR_COMMIT_TAG }}
           CHECKER_CMD: "python check_tag.py"
 
-        # ISVALID: 0=invalid, 1=stable, 2=pre-release
         run: |
-          echo "NEW_TAG=$NEW_TAG" >> $GITHUB_OUTPUT
-          echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_OUTPUT
-          echo "LATEST_STABLE_TAG=$LATEST_STABLE_TAG" >> $GITHUB_OUTPUT
-          echo "IS_VALID=$($CHECKER_CMD $NEW_TAG)" >> $GITHUB_OUTPUT
-          echo "IS_NEWER_THAN_LATEST=$($CHECKER_CMD $NEW_TAG $LATEST_TAG)" >> $GITHUB_OUTPUT
-          echo "IS_NEWER_THAN_LATEST_STABLE=$($CHECKER_CMD $NEW_TAG $LATEST_STABLE_TAG)" >> $GITHUB_OUTPUT
+          RES=$($CHECKER_CMD "$NEW_TAG" "$LATEST_TAG" "$CUR_COMMIT_TAG")
+          if [ "$RES" == "Stable" ]; then
+            IS_BETA=0
+            IS_VALID=1
+          elif [ "$RES" == "Beta" ]; then
+            IS_BETA=1
+            IS_VALID=1
+          else
+            IS_VALID=0
+            ERR_MSG=$RES
+          fi
+
+          echo "IS_VALID=$IS_VALID" >> $GITHUB_OUTPUT
+          echo "IS_BETA=$IS_BETA" >> $GITHUB_OUTPUT
+          echo "ERR_MSG=$ERR_MSG" >> $GITHUB_ENV
 
       - name: Set error message
         id: set_err_msg
-        if: ${{ steps.validate_tag.outputs.IS_VALID == '0' || steps.validate_tag.outputs.IS_NEWER_THAN_LATEST == '0' }}
+        if: ${{ steps.check_tag.outputs.IS_VALID == '0' }}
         env:
-          NEW_TAG: ${{ env.NEW_TAG }}
-          LATEST_TAG: ${{ env.LATEST_TAG }}
-          LATEST_STABLE_TAG: ${{ env.LATEST_STABLE_TAG }}
+          ERR_MSG: ${{ env.ERR_MSG }}
         run: |
-          if [ "${{ steps.validate_tag.outputs.IS_VALID }}" == "0" ]; then
-            echo "ERR_MSG=Invalid version tag format: \`${{ env.NEW_TAG }}\`." >> $GITHUB_OUTPUT
-          elif [ "${{ steps.validate_tag.outputs.IS_NEWER_THAN_LATEST }}" == "0" ]; then
-            echo "ERR_MSG=New tag \`${{ env.NEW_TAG }}\` is not newer than latest tag \`${{ env.LATEST_TAG }}\`." >> $GITHUB_OUTPUT
-          elif [ "${{ steps.validate_tag.outputs.IS_NEWER_THAN_LATEST_STABLE }}" == "0" ]; then
-            echo "ERR_MSG=New tag \`${{ env.NEW_TAG }}\` is not newer than latest stable tag \`${{ env.LATEST_STABLE_TAG }}\`." >> $GITHUB_OUTPUT
-          fi
+          { echo "ERR_MSG<<EOF"
+            echo "${{ env.ERR_MSG }}"
+            echo ""
+            echo "Closing this PR due to the error above."
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
 
   generate-changelog:
     name: Generate changelog PR
     needs:
-      - check-updates
-      - check-tag
-    if: ${{ needs.check-updates.outputs.ERR_MSG == '' && needs.check-tag.outputs.ERR_MSG == '' }}
+      - check
+    if: ${{ needs.check.outputs.IS_VALID == '1' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -151,30 +135,29 @@ jobs:
 
       - name: Generate release notes and changelog
         env: 
-          NEW_TAG: ${{ needs.check-tag.outputs.NEW_TAG }}
-          LATEST_TAG: ${{ needs.check-tag.outputs.LATEST_TAG }}
-          LATEST_STABLE_TAG: ${{ needs.check-tag.outputs.LATEST_STABLE_TAG }}
-          IS_VALID: ${{ needs.check-tag.outputs.IS_VALID }}
+          NEW_TAG: ${{ needs.check.outputs.NEW_TAG }}
+          LATEST_TAG: ${{ needs.check.outputs.LATEST_TAG }}
+          LATEST_STABLE_TAG: ${{ needs.check.outputs.LATEST_STABLE_TAG }}
+          IS_BETA: ${{ needs.check.outputs.IS_BETA }}
 
-        # Due to the bug in commitizen, we currently do not generate the full changelog when the new tag is a pre-release.
         run: |
-          if [ "$IS_VALID" == "1" ]; then
+          if [ "$IS_BETA" == "0" ]; then
             cz ch --dry-run --unreleased-version "$NEW_TAG" --start-rev "$LATEST_STABLE_TAG" --merge-prerelease > UPDATE.md
             cz ch --dry-run --unreleased-version "$NEW_TAG" --merge-prerelease > CHANGELOG.md
-          elif [ "$IS_VALID" == "2" ]; then
+          elif [ "$IS_BETA" == "1" ]; then
             cz ch --dry-run --unreleased-version "$NEW_TAG" --start-rev "$LATEST_TAG" > UPDATE.md
-
-            # cz ch --dry-run --unreleased-version "$NEW_TAG" --start-rev "$LATEST_STABLE_TAG" > CHANGELOG.md
-            # cz ch --dry-run --merge-prerelease "$LATEST_STABLE_TAG" >> CHANGELOG.md
+            cz ch --dry-run --unreleased-version "$NEW_TAG" > CHANGELOG.md
           fi
+
+          echo "$NEW_TAG" > VERSION.md
 
       - name: Generate PR body
         id: generate_pr_body
         env:
-          NEW_TAG: ${{ needs.check-tag.outputs.NEW_TAG }}
-          LATEST_TAG: ${{ needs.check-tag.outputs.LATEST_TAG }}
-          LATEST_STABLE_TAG: ${{ needs.check-tag.outputs.LATEST_STABLE_TAG }}
-          IS_VALID: ${{ needs.check-tag.outputs.IS_VALID }}
+          NEW_TAG: ${{ needs.check.outputs.NEW_TAG }}
+          LATEST_TAG: ${{ needs.check.outputs.LATEST_TAG }}
+          LATEST_STABLE_TAG: ${{ needs.check.outputs.LATEST_STABLE_TAG }}
+          IS_BETA: ${{ needs.check.outputs.IS_BETA }}
         run: |
           PR_BODY_FILE="pr_body.md"
           {
@@ -183,10 +166,10 @@ jobs:
             echo ''
             echo '```'
 
-            if [ "$IS_VALID" == "1" ]; then
+            if [ "$IS_BETA" == "0" ]; then
               echo "type: stable release"
-            elif [ "$IS_VALID" == "2" ]; then
-              echo "type: pre-release"
+            elif [ "$IS_BETA" == "1" ]; then
+              echo "type: beta release"
             fi
 
             echo "new_tag: $NEW_TAG"
@@ -207,20 +190,19 @@ jobs:
       - name: Create changelog PR
         uses: peter-evans/create-pull-request@v7
         with:
-          commit-message: "docs: auto update changelogs for ${{ needs.check-tag.outputs.NEW_TAG }}"
+          commit-message: "docs: auto update changelogs for ${{ needs.check.outputs.NEW_TAG }}"
           branch: changelog
           delete-branch: true
           base: dev
           sign-commits: true
-          title: "docs: auto update changelogs for ${{ needs.check-tag.outputs.NEW_TAG }}"
+          title: "docs: auto update changelogs for ${{ needs.check.outputs.NEW_TAG }}"
           body: "${{ steps.generate_pr_body.outputs.PR_BODY }}"
 
   close-pr:
     name: Close PR if errors occur
     needs:
-      - check-updates
-      - check-tag
-    if: ${{ always() && (needs.check-updates.outputs.ERR_MSG != '' || needs.check-tag.outputs.ERR_MSG != '') }}
+      - check
+    if: ${{ needs.check.outputs.IS_VALID == '0' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -229,7 +211,6 @@ jobs:
       - name: Close PR if errors occur
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          ERR_MSG: ${{ needs.check-updates.outputs.ERR_MSG || needs.check-tag.outputs.ERR_MSG }}
+          ERR_MSG: ${{ needs.check.outputs.ERR_MSG }}
         run: |
-          COMMENT="${ERR_MSG} Closing this PR."
-          gh pr close ${{ github.event.pull_request.number }} -c "$COMMENT" -R ${{ github.repository }}
+          gh pr close ${{ github.event.pull_request.number }} -c "$ERR_MSG" -R ${{ github.repository }}
