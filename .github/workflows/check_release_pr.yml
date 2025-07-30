@@ -94,6 +94,6 @@ jobs:
 
       - name: Merge PR
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PYCONFIGWEBUI_RELEASE }}
         run: |
           gh pr merge ${{ github.event.pull_request.number }} --auto --merge

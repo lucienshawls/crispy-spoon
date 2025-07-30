@@ -100,7 +100,7 @@ jobs:
           ERR_MSG: ${{ env.ERR_MSG }}
         run: |
           { echo "ERR_MSG<<EOF"
-            echo "${{ env.ERR_MSG }}"
+            echo '${{ env.ERR_MSG }}'
             echo ""
             echo "Closing this PR due to the error above."
             echo "EOF"
