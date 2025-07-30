@@ -87,6 +87,7 @@ jobs:
           else
             IS_VALID=0
             ERR_MSG=$RES
+          fi
 
           echo "IS_VALID=$IS_VALID" >> $GITHUB_OUTPUT
           echo "IS_BETA=$IS_BETA" >> $GITHUB_OUTPUT
