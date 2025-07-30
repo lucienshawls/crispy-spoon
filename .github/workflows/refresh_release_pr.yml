@@ -1,0 +1,45 @@
+name: Refresh release PR
+
+on:
+  workflow_run:
+    workflows: 
+      # - "Check release PR"
+      - "DISABLE"
+    types:
+      - completed
+
+jobs:
+  refresh_release_pr:
+    name: Refresh release PR
+    # if: ${{  github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get PR number
+        id: get_pr_number
+        run: |
+          PR_JSON='${{ toJSON(github.event.workflow_run.pull_requests) }}'
+          echo "PR_NUMBER=$(echo "$PR_JSON" | jq -r '.[0].number')" >> $GITHUB_OUTPUT
+
+      - name: Merge release PR
+        if: ${{ github.event.workflow_run.conclusion == 'success' }}
+        env:
+          PR_NUMBER: ${{ steps.get_pr_number.outputs.PR_NUMBER }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          gh pr merge ${{ env.PR_NUMBER }} --merge
+
+      - name: Set release PR to draft
+        env:
+          PR_NUMBER: ${{ steps.get_pr_number.outputs.PR_NUMBER }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          gh pr edit ${{ env.PR_NUMBER }} --draft

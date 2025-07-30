@@ -1,4 +1,4 @@
-name: Check if release is ready
+name: Check release PR
 on:
   pull_request:
     branches:
@@ -50,3 +50,26 @@ jobs:
             echo "::error::Version mismatch. Please merge the changelog PR first."
             exit 1
           fi
+
+  set_to_draft:
+    name: Set release PR to draft
+    needs: check_if_release_ready
+    if: >
+      needs.check_if_release_ready.result == 'failure' &&
+      github.event.pull_request.head.ref == 'dev' &&
+      github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set PR to draft
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr edit ${{ github.event.pull_request.number }} --draft
