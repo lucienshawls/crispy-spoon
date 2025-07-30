@@ -1,0 +1,52 @@
+name: Check if release is ready
+on:
+  pull_request:
+    branches:
+      - master
+    types:
+      - synchronize
+
+jobs:
+  check_if_release_ready:
+    name: Check if release is ready
+    if: >
+      github.event.pull_request.draft == false &&
+      startsWith(github.event.pull_request.title, 'Release v') &&
+      github.event.pull_request.base.ref == 'master'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify PR head branch
+        run: |
+          if [ "${{ github.event.pull_request.head.ref }}" != "dev" ]; then
+            echo "::error::This PR must be based on the 'dev' branch."
+            exit 1
+          fi
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify VERSION.md exists
+        id: check-file
+        run: |
+          if [ ! -f "VERSION.md" ]; then
+            echo "::error::VERSION.md file not found."
+            exit 1
+          fi
+
+      - name: Extract new tag from PR title
+        run: |
+          title="${{ github.event.pull_request.title }}"
+          NEW_TAG=$(echo "$title" | sed -E "s/([Rr]elease)//" | sed -e "s/^[[:space:]]*//" -e "s/[[:space:]]*$//")
+          echo "NEW_TAG=$NEW_TAG" >> $GITHUB_ENV
+
+      - name: Compare versions
+        run: |
+          FILE_VERSION=$(cat VERSION.md | tr -d '\n')
+          PR_VERSION="$NEW_TAG"
+          
+          if [ "$FILE_VERSION" != "$PR_VERSION" ]; then
+            echo "::error::Version mismatch. Please merge the changelog PR first."
+            exit 1
+          fi
