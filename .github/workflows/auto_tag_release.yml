@@ -1,4 +1,4 @@
-name: Auto Tag Release
+name: Auto tag release
 
 on:
   pull_request:
@@ -9,7 +9,7 @@ on:
 
 jobs:
   auto_tag_release:
-    name: Auto Tag Release
+    name: Auto tag release
     if: github.event.pull_request.merged == true && (startsWith(github.event.pull_request.title, 'Release v'))
     runs-on: ubuntu-latest
     permissions:
@@ -24,7 +24,7 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.PYCONFIGWEBUI_RELEASE }}
 
-      - name: Git config
+      - name: Modify git config
         run: |
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
