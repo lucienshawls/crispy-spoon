@@ -214,3 +214,8 @@ jobs:
           ERR_MSG: ${{ needs.check.outputs.ERR_MSG }}
         run: |
           gh pr close ${{ github.event.pull_request.number }} -c "$ERR_MSG" -R ${{ github.repository }}
+
+      - name: Manually Fail the workflow
+        run: |
+          echo "::error::Changelog PR generation failed."
+          exit 1

@@ -75,13 +75,13 @@ jobs:
         run: |
           gh pr ready ${{ github.event.pull_request.number }} --undo
 
-      - name: Fail the workflow
+      - name: Manually Fail the workflow
         run: |
           echo "::error::Release is not ready. Please merge the changelog PR first."
           exit 1
 
   auto_merge_release_pr:
-    name: Auto Merge Release PR
+    name: Auto merge release PR
     needs: check_if_release_ready
     if: >
       needs.check_if_release_ready.outputs.READY == '1' &&
