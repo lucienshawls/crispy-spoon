@@ -91,7 +91,7 @@ jobs:
 
           echo "IS_VALID=$IS_VALID" >> $GITHUB_OUTPUT
           echo "IS_BETA=$IS_BETA" >> $GITHUB_OUTPUT
-          echo ERR_MSG=$ERR_MSG >> $GITHUB_ENV
+          echo "ERR_MSG=$ERR_MSG" >> $GITHUB_ENV
 
       - name: Set error message
         id: set_err_msg
@@ -100,7 +100,7 @@ jobs:
           ERR_MSG: ${{ env.ERR_MSG }}
         run: |
           { echo "ERR_MSG<<EOF"
-            echo "${{ env.ERR_MSG }}"
+            echo '${{ env.ERR_MSG }}'
             echo ""
             echo "Closing this PR due to the error above."
             echo "EOF"
