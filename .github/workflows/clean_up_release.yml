@@ -6,8 +6,6 @@ on:
       - "Check if release is ready"
     types:
       - completed
-    branches:
-      - master
 
 jobs:
   auto_merge:
