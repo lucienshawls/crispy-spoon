@@ -73,3 +73,27 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh pr edit ${{ github.event.pull_request.number }} --draft
+
+  auto_merge_release_pr:
+    name: Auto Merge Release PR
+    needs: check_if_release_ready
+    if: >
+      needs.check_if_release_ready.result == 'success' &&
+      github.event.pull_request.head.ref == 'dev' &&
+      github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Merge PR
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr merge ${{ github.event.pull_request.number }} --auto --merge
