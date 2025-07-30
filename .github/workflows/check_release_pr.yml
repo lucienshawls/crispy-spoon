@@ -60,8 +60,7 @@ jobs:
     needs: check_if_release_ready
     if: >
       needs.check_if_release_ready.outputs.READY == '0' &&
-      github.event.pull_request.head.ref == 'dev' &&
-      github.event.pull_request.draft == false
+      github.event.pull_request.head.ref == 'dev'
     runs-on: ubuntu-latest
 
     steps:
