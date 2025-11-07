@@ -2,23 +2,23 @@ name: Winget Test
 on:
   workflow_dispatch:
     inputs:
-      maa_version:
-        description: 'MAA Version (without "v" prefix)'
+      release_tag:
+        description: 'Release Tag (e.g. "v1.0.0")'
+        type: string
         required: true
 
 jobs:
   publish:
     runs-on: windows-latest
     steps:
-      - name: Publish MAA to winget
+      - name: Trim leading v
+        id: trim_version
         env:
-          MAA_VERSION: ${{ github.event.inputs.maa_version }}
-        uses: vedantmgoyal9/winget-releaser@main
-        with:
-          identifier: MaaAssistantArknights.MaaAssistantArknights
-          version: ${{ env.MAA_VERSION }}
-          installers-regex: "-win-"
-          max-versions-to-keep: 0
-          release-tag: "v${{ env.MAA_VERSION }}"
-          fork-user: lucienshawls
-          token: ${{ secrets.WINGET_MAA }}
+          TAG: ${{ github.event.inputs.release_tag }}
+        run: |
+          $VERSION = "$TAG" -replace '^v', ''
+          echo "VERSION=$VERSION" >> $env:GITHUB_OUTPUT
+      - name: Show version
+        env:
+          VERSION: ${{ steps.trim_version.outputs.VERSION }}
+        run: echo "Version is $env:VERSION"
