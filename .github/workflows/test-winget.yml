@@ -9,3 +9,10 @@ jobs:
       - name: Show winget version
         run: |
           winget --version
+      - name: Install komac
+        run: |
+          winget install komac
+
+      - name: Verify komac installation
+        run: |
+          komac --version
