@@ -17,13 +17,6 @@ jobs:
     outputs:
       READY: ${{ steps.check_version.outputs.READY }}
     steps:
-      - name: Verify PR head branch
-        run: |
-          if [ "${{ github.event.pull_request.head.ref }}" != "dev" ]; then
-            echo "::error::This PR must be based on the 'dev' branch."
-            exit 1
-          fi
-
       - name: Checkout code
         uses: actions/checkout@v4
         with:
