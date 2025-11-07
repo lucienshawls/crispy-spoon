@@ -11,6 +11,9 @@ on:
         type: boolean
         default: false
 
+env:
+  TAG: ${{ github.event.inputs.release_tag }}
+
 jobs:
   publish:
     runs-on: windows-latest
@@ -18,10 +21,8 @@ jobs:
     steps:
       - name: Trim leading v
         id: trim_version
-        env:
-          TAG: ${{ github.event.inputs.release_tag }}
         run: |
-          $VERSION = "$env:TAG" -replace '^v', ''
+          $VERSION = ${{ env.TAG }} -replace '^v', ''
           echo "VERSION=$VERSION" >> $env:GITHUB_OUTPUT
       - name: Show version
         env:
