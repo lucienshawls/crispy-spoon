@@ -17,7 +17,7 @@ env:
 jobs:
   publish:
     runs-on: windows-latest
-    if: ${{ github.event.inputs.publish }}
+    if: ${{ github.event.inputs.publish == 'true' }}
     steps:
       - name: Trim leading v
         id: trim_version
