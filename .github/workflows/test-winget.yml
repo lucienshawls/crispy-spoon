@@ -22,7 +22,7 @@ jobs:
       - name: Trim leading v
         id: trim_version
         run: |
-          $VERSION = ${{ env.TAG }} -replace '^v', ''
+          $VERSION = "$env:TAG" -replace '^v', ''
           echo "VERSION=$VERSION" >> $env:GITHUB_OUTPUT
       - name: Show version
         env:
