@@ -6,17 +6,22 @@ on:
         description: 'Release Tag (e.g. "v1.0.0")'
         type: string
         required: true
+      publish:
+        description: "Switch on"
+        type: boolean
+        default: false
 
 jobs:
   publish:
     runs-on: windows-latest
+    if: ${{ github.event.inputs.publish }}
     steps:
       - name: Trim leading v
         id: trim_version
         env:
           TAG: ${{ github.event.inputs.release_tag }}
         run: |
-          $VERSION = "$TAG" -replace '^v', ''
+          $VERSION = "$env:TAG" -replace '^v', ''
           echo "VERSION=$VERSION" >> $env:GITHUB_OUTPUT
       - name: Show version
         env:
