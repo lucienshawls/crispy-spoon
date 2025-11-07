@@ -1,13 +1,24 @@
 name: Winget Test
 on:
-  - workflow_dispatch
+  workflow_dispatch:
+    inputs:
+      maa_version:
+        description: 'MAA Version (without "v" prefix)'
+        required: true
 
 jobs:
   publish:
     runs-on: windows-latest
     steps:
-      - uses: vedantmgoyal9/winget-releaser@main
+      - name: Publish MAA to winget
+        env:
+          MAA_VERSION: ${{ github.event.inputs.maa_version }}
+        uses: vedantmgoyal9/winget-releaser@main
         with:
           identifier: MaaAssistantArknights.MaaAssistantArknights
+          version: ${{ env.MAA_VERSION }}
+          installers-regex: "-win-"
           max-versions-to-keep: 0
-          token: ${{ secrets.WINGET_TOKEN }}
+          release-tag: "v${{ env.MAA_VERSION }}"
+          fork-user: lucienshawls
+          token: ${{ secrets.WINGET_MAA }}
