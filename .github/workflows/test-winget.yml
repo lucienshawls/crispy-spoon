@@ -11,7 +11,7 @@ jobs:
           winget --version
       - name: Install komac
         run: |
-          winget install komac
+          winget install komac --accept-source-agreements --accept-package-agreements
 
       - name: Verify komac installation
         run: |
