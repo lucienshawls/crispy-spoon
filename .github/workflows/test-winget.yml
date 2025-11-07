@@ -1,0 +1,11 @@
+name: Winget Test
+on:
+  - workflow_dispatch
+jobs:
+  winget_test:
+    name: Test Winget
+    runs-on: windows-latest
+    steps:
+      - name: Show winget version
+        run: |
+          winget --version
