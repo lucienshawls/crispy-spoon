@@ -9,6 +9,9 @@ on:
         description: "Input B (boolean)"
         type: boolean
 
+permissions:
+  actions: write
+
 jobs:
   gh-cli:
     name: Test GitHub CLI
