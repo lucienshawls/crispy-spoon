@@ -1,0 +1,27 @@
+name: GitHub CLI Test
+on:
+  workflow_dispatch:
+    inputs:
+      a:
+        description: "Input A (string)"
+        type: string
+      b:
+        description: "Input B (boolean)"
+        type: boolean
+
+jobs:
+  gh-cli:
+    name: Test GitHub CLI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Show gh cli version
+        run: gh --version
+
+      - name: Test workflow run
+        env:
+          INPUT_A: ${{ github.event.inputs.a }}
+          INPUT_B: ${{ github.event.inputs.b }}
+        run: |
+          gh workflow run --repo $GITHUB_REPOSITORY test-winget.yml \
+            -f release_tag="${{ github.event.inputs.a }}" \
+            -f publish=${{ github.event.inputs.b == 'false' }}
