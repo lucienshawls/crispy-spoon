@@ -21,6 +21,6 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh workflow run --repo $GITHUB_REPOSITORY test-winget.yml \
+          gh workflow run --repo ${{ github.repository }} test-winget.yml \
             -f release_tag="${{ github.event.inputs.a }}" \
             -f publish=${{ github.event.inputs.b == 'false' }}
