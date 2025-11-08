@@ -13,12 +13,36 @@ permissions:
   actions: write
 
 jobs:
-  test-input:
+  test-input-1:
     # 再次确认，布尔判断必须写 == 'true' 或者 == 'false'
-    name: Test Inputs
+    name: Test Inputs 1 (Wrong)
     runs-on: ubuntu-latest
     # 如果 b 设置为 false，此 job 仍会运行（这个语法无法达成预期效果）
     if: ${{ github.event.inputs.b }}
+    steps:
+      - name: Show inputs
+        run: |
+          echo "Input A is '${{ github.event.inputs.a }}'"
+          echo "Input B is '${{ github.event.inputs.b }}'"
+
+  test-input-2:
+    # 再次确认，布尔判断必须写 == 'true' 或者 == 'false'
+    name: Test Inputs 2 (Correct)
+    runs-on: ubuntu-latest
+    # 如果 b 设置为 false，此 job 不会运行（正确）
+    if: ${{ github.event.inputs.b == 'true' }}
+    steps:
+      - name: Show inputs
+        run: |
+          echo "Input A is '${{ github.event.inputs.a }}'"
+          echo "Input B is '${{ github.event.inputs.b }}'"
+
+  test-input-3:
+    # 再次确认，布尔判断必须写 == 'true' 或者 == 'false'
+    name: Test Inputs 3 (Correct)
+    runs-on: ubuntu-latest
+    # 如果 b 设置为 false，此 job 不会运行（正确）
+    if: ${{ fromJson(github.event.inputs.b) }}
     steps:
       - name: Show inputs
         run: |
