@@ -10,7 +10,11 @@ on:
         type: boolean
 
 permissions:
-  actions: write
+  contents: read
+
+env:
+  BOT_APP_ID: ${{ vars.MAA_REPOSITORY_MANAGER_APP_ID }}
+  BOT_PRIVATE_KEY: ${{ secrets.MAA_REPOSITORY_MANAGER_PRIVATE_KEY }}
 
 jobs:
   test-input-1:
@@ -56,9 +60,16 @@ jobs:
       - name: Show gh cli version
         run: gh --version
 
+      - name: Get bot token
+        uses: actions/create-github-app-token@v2
+        id: get-bot-token
+        with:
+          app-id: ${{ env.BOT_APP_ID }}
+          private-key: ${{ env.BOT_PRIVATE_KEY }}
+
       - name: Test workflow run
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ steps.get-bot-token.outputs.token }}
         run: |
           gh workflow run --repo ${{ github.repository }} test-winget.yml \
             -f release_tag="${{ github.event.inputs.a }}" \
