@@ -35,3 +35,12 @@ jobs:
           if [ "${{ inputs.value }}" ]; then
             echo "The input value is true, by inputs in shell.";
           fi
+
+      - name: Test contains
+        run: |
+          if [[ "${{ contains(github.ref, 'refs/heads') }}" == "true" ]]; then
+            echo "The ref contains 'refs/heads', by string comparison.";
+          fi
+          if ${{ contains(github.ref, 'refs/heads') }}; then
+            echo "The ref contains 'refs/heads', by boolean comparison.";
+          fi
