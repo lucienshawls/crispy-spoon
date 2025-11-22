@@ -1,0 +1,37 @@
+name: Expression Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      value:
+        description: "A boolean value (true/false)"
+        required: true
+        type: boolean
+        default: false
+
+jobs:
+  test-expression:
+    name: Test Expression
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test github.event.inputs in step.if
+        if: ${{ github.event.inputs.value == 'true' }}
+        run: |
+          echo "The input value is true, by github.event.inputs."
+
+      - name: Test inputs in step.if
+        if: ${{ inputs.value }}
+        run: |
+          echo "The input value is true, by inputs."
+
+      - name: Test github.event.inputs in shell.if
+        run: |
+          if [ "${{ github.event.inputs.value }}" == "true" ]; then
+            echo "The input value is true, by github.event.inputs in shell.";
+          fi
+
+      - name: Test inputs in shell.if
+        run: |
+          if [ "${{ inputs.value }}" ]; then
+            echo "The input value is true, by inputs in shell.";
+          fi
