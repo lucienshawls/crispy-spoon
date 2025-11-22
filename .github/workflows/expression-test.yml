@@ -3,11 +3,16 @@ name: Expression Test
 on:
   workflow_dispatch:
     inputs:
-      value:
+      bool_value:
         description: "A boolean value (true/false)"
         required: true
         type: boolean
         default: false
+      string_value:
+        description: "A string value"
+        required: false
+        type: string
+        default: "refs/heads/"
 
 jobs:
   test-expression:
@@ -15,32 +20,32 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Test github.event.inputs in step.if
-        if: ${{ github.event.inputs.value == 'true' }}
+        if: ${{ github.event.inputs.bool_value == 'true' }}
         run: |
           echo "The input value is true, by github.event.inputs."
 
       - name: Test inputs in step.if
-        if: ${{ inputs.value }}
+        if: ${{ inputs.bool_value }}
         run: |
           echo "The input value is true, by inputs."
 
       - name: Test github.event.inputs in shell.if
         run: |
-          if [ "${{ github.event.inputs.value }}" == "true" ]; then
+          if [ "${{ github.event.inputs.bool_value }}" == "true" ]; then
             echo "The input value is true, by github.event.inputs in shell.";
           fi
 
       - name: Test inputs in shell.if
         run: |
-          if [ "${{ inputs.value }}" ]; then
+          if [ "${{ inputs.bool_value }}" ]; then
             echo "The input value is true, by inputs in shell.";
           fi
 
       - name: Test contains
         run: |
-          if [[ "${{ contains(github.ref, 'refs/heads') }}" == "true" ]]; then
-            echo "The ref contains 'refs/heads', by string comparison.";
+          if [[ "${{ contains(github.ref, inputs.string_value) }}" == "true" ]]; then
+            echo "The ref contains ${{ inputs.string_value }}, by string comparison.";
           fi
-          if ${{ contains(github.ref, 'refs/heads') }}; then
-            echo "The ref contains 'refs/heads', by boolean comparison.";
+          if ${{ contains(github.ref, inputs.string_value) }}; then
+            echo "The ref contains ${{ inputs.string_value }}, by boolean comparison.";
           fi
